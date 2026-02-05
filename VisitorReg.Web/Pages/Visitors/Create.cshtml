@@ -1,0 +1,89 @@
+@page
+@model VisitorReg.Web.Pages.Visitors.CreateModel
+@{
+    ViewData["Title"] = "訪客登記";
+}
+
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <div class="card shadow">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0"><i class="bi bi-person-plus-fill"></i> 訪客登記</h4>
+            </div>
+            <div class="card-body">
+                @if (!string.IsNullOrEmpty(Model.SuccessMessage))
+                {
+                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                        <strong>登記成功！</strong> @Model.SuccessMessage
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                }
+
+                <form method="post">
+                    <div class="mb-3">
+                        <label asp-for="Input.Name" class="form-label">訪客姓名 <span class="text-danger">*</span></label>
+                        <input asp-for="Input.Name" class="form-control" placeholder="請輸入訪客姓名" />
+                        <span asp-validation-for="Input.Name" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Input.IdNumber" class="form-label">證件號碼</label>
+                        <input asp-for="Input.IdNumber" class="form-control" placeholder="選填，將自動遮罩儲存" />
+                        <span asp-validation-for="Input.IdNumber" class="text-danger"></span>
+                        <small class="form-text text-muted">證件號碼將以遮罩方式儲存（例如：A12****789）</small>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Input.Company" class="form-label">公司/單位</label>
+                        <input asp-for="Input.Company" class="form-control" placeholder="請輸入公司或單位名稱" />
+                        <span asp-validation-for="Input.Company" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Input.Purpose" class="form-label">來訪目的 <span class="text-danger">*</span></label>
+                        <textarea asp-for="Input.Purpose" class="form-control" rows="3" placeholder="請輸入來訪目的"></textarea>
+                        <span asp-validation-for="Input.Purpose" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Input.HostName" class="form-label">受訪者 <span class="text-danger">*</span></label>
+                        <input asp-for="Input.HostName" class="form-control" placeholder="請輸入受訪者姓名" />
+                        <span asp-validation-for="Input.HostName" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Input.CheckInAt" class="form-label">到訪時間 <span class="text-danger">*</span></label>
+                        <input asp-for="Input.CheckInAt" type="datetime-local" class="form-control" />
+                        <span asp-validation-for="Input.CheckInAt" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Input.Phone" class="form-label">聯絡方式</label>
+                        <input asp-for="Input.Phone" class="form-control" placeholder="請輸入電話或手機號碼" />
+                        <span asp-validation-for="Input.Phone" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Input.Note" class="form-label">備註</label>
+                        <textarea asp-for="Input.Note" class="form-control" rows="2" placeholder="其他備註事項"></textarea>
+                        <span asp-validation-for="Input.Note" class="text-danger"></span>
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="bi bi-check-circle"></i> 確認登記
+                        </button>
+                        <a asp-page="/Index" class="btn btn-secondary">
+                            <i class="bi bi-arrow-left"></i> 返回首頁
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+}

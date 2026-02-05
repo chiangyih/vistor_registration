@@ -1,0 +1,115 @@
+@page "{id:guid}"
+@model VisitorReg.Web.Pages.Visitors.DetailModel
+@{
+    ViewData["Title"] = "訪客詳細資料";
+}
+
+@if (Model.Visitor != null)
+{
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <div class="card shadow">
+                <div class="card-header bg-info text-white">
+                    <h4 class="mb-0"><i class="bi bi-person-badge-fill"></i> 訪客詳細資料</h4>
+                </div>
+                <div class="card-body">
+                    <dl class="row">
+                        <dt class="col-sm-3">登記編號</dt>
+                        <dd class="col-sm-9">
+                            <span class="badge bg-primary">@Model.Visitor.RegisterNo</span>
+                        </dd>
+
+                        <dt class="col-sm-3">訪客姓名</dt>
+                        <dd class="col-sm-9">@Model.Visitor.Name</dd>
+
+                        @if (!string.IsNullOrEmpty(Model.Visitor.IdNumberMasked))
+                        {
+                            <dt class="col-sm-3">證件號碼</dt>
+                            <dd class="col-sm-9">@Model.Visitor.IdNumberMasked</dd>
+                        }
+
+                        @if (!string.IsNullOrEmpty(Model.Visitor.Company))
+                        {
+                            <dt class="col-sm-3">公司/單位</dt>
+                            <dd class="col-sm-9">@Model.Visitor.Company</dd>
+                        }
+
+                        <dt class="col-sm-3">來訪目的</dt>
+                        <dd class="col-sm-9">@Model.Visitor.Purpose</dd>
+
+                        <dt class="col-sm-3">受訪者</dt>
+                        <dd class="col-sm-9">@Model.Visitor.HostName</dd>
+
+                        <dt class="col-sm-3">到訪時間</dt>
+                        <dd class="col-sm-9">@Model.Visitor.CheckInAt.ToString("yyyy-MM-dd HH:mm:ss")</dd>
+
+                        @if (Model.Visitor.CheckOutAt.HasValue)
+                        {
+                            <dt class="col-sm-3">離場時間</dt>
+                            <dd class="col-sm-9">@Model.Visitor.CheckOutAt.Value.ToString("yyyy-MM-dd HH:mm:ss")</dd>
+                        }
+
+                        @if (!string.IsNullOrEmpty(Model.Visitor.Phone))
+                        {
+                            <dt class="col-sm-3">聯絡方式</dt>
+                            <dd class="col-sm-9">@Model.Visitor.Phone</dd>
+                        }
+
+                        @if (!string.IsNullOrEmpty(Model.Visitor.Note))
+                        {
+                            <dt class="col-sm-3">備註</dt>
+                            <dd class="col-sm-9">@Model.Visitor.Note</dd>
+                        }
+
+                        <dt class="col-sm-3">狀態</dt>
+                        <dd class="col-sm-9">
+                            @if (Model.Visitor.Status == VisitorReg.Domain.Enums.VisitorStatus.InSite)
+                            {
+                                <span class="badge bg-success">在場</span>
+                            }
+                            else if (Model.Visitor.Status == VisitorReg.Domain.Enums.VisitorStatus.CheckedOut)
+                            {
+                                <span class="badge bg-secondary">已離場</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-danger">作廢</span>
+                            }
+                        </dd>
+
+                        <dt class="col-sm-3">建立時間</dt>
+                        <dd class="col-sm-9">@Model.Visitor.CreatedAt.ToString("yyyy-MM-dd HH:mm:ss")</dd>
+
+                        <dt class="col-sm-3">建立者</dt>
+                        <dd class="col-sm-9">@Model.Visitor.CreatedBy</dd>
+                    </dl>
+
+                    <div class="d-grid gap-2">
+                        @if (Model.Visitor.Status == VisitorReg.Domain.Enums.VisitorStatus.InSite)
+                        {
+                            <a asp-page="/Visitors/Checkout" asp-route-id="@Model.Visitor.Id" class="btn btn-warning btn-lg">
+                                <i class="bi bi-box-arrow-right"></i> 離場登記
+                            </a>
+                        }
+                        <a asp-page="/Visitors/Index" class="btn btn-secondary">
+                            <i class="bi bi-arrow-left"></i> 返回列表
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+else
+{
+    <div class="alert alert-danger">
+        <i class="bi bi-exclamation-triangle"></i> 找不到指定的訪客資料
+    </div>
+    <a asp-page="/Visitors/Index" class="btn btn-secondary">
+        <i class="bi bi-arrow-left"></i> 返回列表
+    </a>
+}
+
+@section Scripts {
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+}

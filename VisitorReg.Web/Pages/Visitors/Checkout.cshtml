@@ -1,0 +1,74 @@
+@page "{id:guid}"
+@model VisitorReg.Web.Pages.Visitors.CheckoutModel
+@{
+    ViewData["Title"] = "離場登記";
+}
+
+@if (Model.Visitor != null)
+{
+    <div class="row">
+        <div class="col-md-6 offset-md-3">
+            <div class="card shadow">
+                <div class="card-header bg-warning text-dark">
+                    <h4 class="mb-0"><i class="bi bi-box-arrow-right"></i> 離場登記</h4>
+                </div>
+                <div class="card-body">
+                    @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+                    {
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <strong>錯誤！</strong> @Model.ErrorMessage
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    }
+
+                    <div class="alert alert-info">
+                        <h5>訪客資訊</h5>
+                        <dl class="mb-0">
+                            <dt>登記編號</dt>
+                            <dd>@Model.Visitor.RegisterNo</dd>
+                            <dt>訪客姓名</dt>
+                            <dd>@Model.Visitor.Name</dd>
+                            <dt>受訪者</dt>
+                            <dd>@Model.Visitor.HostName</dd>
+                            <dt>到訪時間</dt>
+                            <dd>@Model.Visitor.CheckInAt.ToString("yyyy-MM-dd HH:mm")</dd>
+                        </dl>
+                    </div>
+
+                    <form method="post">
+                        <input type="hidden" asp-for="VisitorId" />
+                        
+                        <div class="mb-3">
+                            <label asp-for="CheckoutTime" class="form-label">離場時間 <span class="text-danger">*</span></label>
+                            <input asp-for="CheckoutTime" type="datetime-local" class="form-control" />
+                            <span asp-validation-for="CheckoutTime" class="text-danger"></span>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-warning btn-lg">
+                                <i class="bi bi-check-circle"></i> 確認離場
+                            </button>
+                            <a asp-page="/Visitors/Detail" asp-route-id="@Model.Visitor.Id" class="btn btn-secondary">
+                                <i class="bi bi-arrow-left"></i> 取消
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+else
+{
+    <div class="alert alert-danger">
+        <i class="bi bi-exclamation-triangle"></i> 找不到指定的訪客資料
+    </div>
+    <a asp-page="/Visitors/Index" class="btn btn-secondary">
+        <i class="bi bi-arrow-left"></i> 返回列表
+    </a>
+}
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+}

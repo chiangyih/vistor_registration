@@ -1,0 +1,79 @@
+@page
+@model RegisterModel
+@{
+    ViewData["Title"] = "註冊";
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-6 col-lg-5">
+        <div class="card shadow-sm">
+            <div class="card-body p-4">
+                <h2 class="card-title text-center mb-4">@ViewData["Title"]</h2>
+                <p class="text-muted text-center mb-4">建立新帳號</p>
+
+                <form id="registerForm" asp-route-returnUrl="@Model.ReturnUrl" method="post">
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+                    
+                    <div class="mb-3">
+                        <label asp-for="Input.Email" class="form-label">電子郵件</label>
+                        <input asp-for="Input.Email" class="form-control" autocomplete="username" 
+                               aria-required="true" placeholder="name@example.com" />
+                        <span asp-validation-for="Input.Email" class="text-danger small"></span>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label asp-for="Input.Password" class="form-label">密碼</label>
+                        <input asp-for="Input.Password" class="form-control" autocomplete="new-password" 
+                               aria-required="true" placeholder="請輸入密碼" type="password" />
+                        <span asp-validation-for="Input.Password" class="text-danger small"></span>
+                        <div class="form-text small">
+                            密碼必須至少 8 個字元，包含大寫字母、小寫字母、數字和特殊字元。
+                        </div>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label asp-for="Input.ConfirmPassword" class="form-label">確認密碼</label>
+                        <input asp-for="Input.ConfirmPassword" class="form-control" autocomplete="new-password" 
+                               aria-required="true" placeholder="請再次輸入密碼" type="password" />
+                        <span asp-validation-for="Input.ConfirmPassword" class="text-danger small"></span>
+                    </div>
+                    
+                    <button id="registerSubmit" type="submit" class="btn btn-primary w-100 mb-3">註冊</button>
+                    
+                    <div class="text-center">
+                        <p class="mb-0">
+                            已經有帳號了嗎？
+                            <a asp-page="./Login" asp-route-returnUrl="@Model.ReturnUrl">登入</a>
+                        </p>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        @* 外部登入服務區塊（如果有配置） *@
+        @if ((Model.ExternalLogins?.Count ?? 0) > 0)
+        {
+            <div class="card shadow-sm mt-3">
+                <div class="card-body">
+                    <h4 class="card-title">使用其他服務註冊</h4>
+                    <hr />
+                    <form id="external-account" asp-page="./ExternalLogin" asp-route-returnUrl="@Model.ReturnUrl" method="post" class="form-horizontal">
+                        <div class="d-grid gap-2">
+                            @foreach (var provider in Model.ExternalLogins!)
+                            {
+                                <button type="submit" class="btn btn-outline-secondary" name="provider" value="@provider.Name" 
+                                        title="使用您的 @provider.DisplayName 帳號登入">
+                                    @provider.DisplayName
+                                </button>
+                            }
+                        </div>
+                    </form>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

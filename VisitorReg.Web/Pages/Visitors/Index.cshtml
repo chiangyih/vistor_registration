@@ -1,0 +1,155 @@
+@page
+@model VisitorReg.Web.Pages.Visitors.IndexModel
+@{
+    ViewData["Title"] = "查詢訪客";
+}
+
+<div class="row">
+    <div class="col-12">
+        <div class="card shadow">
+            <div class="card-header bg-success text-white">
+                <h4 class="mb-0"><i class="bi bi-search"></i> 查詢訪客</h4>
+            </div>
+            <div class="card-body">
+                <form method="get" class="mb-4">
+                    <div class="row g-3">
+                        <div class="col-md-3">
+                            <label asp-for="SearchCriteria.StartDate" class="form-label">開始日期</label>
+                            <input asp-for="SearchCriteria.StartDate" type="date" class="form-control" />
+                        </div>
+                        <div class="col-md-3">
+                            <label asp-for="SearchCriteria.EndDate" class="form-label">結束日期</label>
+                            <input asp-for="SearchCriteria.EndDate" type="date" class="form-control" />
+                        </div>
+                        <div class="col-md-3">
+                            <label asp-for="SearchCriteria.Name" class="form-label">訪客姓名</label>
+                            <input asp-for="SearchCriteria.Name" class="form-control" placeholder="請輸入姓名" />
+                        </div>
+                        <div class="col-md-3">
+                            <label asp-for="SearchCriteria.Company" class="form-label">公司/單位</label>
+                            <input asp-for="SearchCriteria.Company" class="form-control" placeholder="請輸入公司" />
+                        </div>
+                        <div class="col-md-3">
+                            <label asp-for="SearchCriteria.HostName" class="form-label">受訪者</label>
+                            <input asp-for="SearchCriteria.HostName" class="form-control" placeholder="請輸入受訪者" />
+                        </div>
+                        <div class="col-md-3">
+                            <label asp-for="SearchCriteria.Status" class="form-label">狀態</label>
+                            <select asp-for="SearchCriteria.Status" class="form-select">
+                                <option value="">全部</option>
+                                <option value="0">在場</option>
+                                <option value="1">已離場</option>
+                                <option value="2">作廢</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6 d-flex align-items-end">
+                            <button type="submit" class="btn btn-primary me-2">
+                                <i class="bi bi-search"></i> 查詢
+                            </button>
+                            <a asp-page="/Visitors/Index" class="btn btn-secondary">
+                                <i class="bi bi-arrow-clockwise"></i> 清除
+                            </a>
+                        </div>
+                    </div>
+                </form>
+
+                @if (Model.Visitors != null && Model.Visitors.Items.Any())
+                {
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>登記編號</th>
+                                    <th>訪客姓名</th>
+                                    <th>公司/單位</th>
+                                    <th>受訪者</th>
+                                    <th>到訪時間</th>
+                                    <th>狀態</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var visitor in Model.Visitors.Items)
+                                {
+                                    <tr>
+                                        <td>@visitor.RegisterNo</td>
+                                        <td>@visitor.Name</td>
+                                        <td>@(visitor.Company ?? "-")</td>
+                                        <td>@visitor.HostName</td>
+                                        <td>@visitor.CheckInAt.ToString("yyyy-MM-dd HH:mm")</td>
+                                        <td>
+                                            @if (visitor.Status == VisitorReg.Domain.Enums.VisitorStatus.InSite)
+                                            {
+                                                <span class="badge bg-success">在場</span>
+                                            }
+                                            else if (visitor.Status == VisitorReg.Domain.Enums.VisitorStatus.CheckedOut)
+                                            {
+                                                <span class="badge bg-secondary">已離場</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-danger">作廢</span>
+                                            }
+                                        </td>
+                                        <td>
+                                            <a asp-page="/Visitors/Detail" asp-route-id="@visitor.Id" class="btn btn-sm btn-info">
+                                                <i class="bi bi-eye"></i> 詳細
+                                            </a>
+                                            @if (visitor.Status == VisitorReg.Domain.Enums.VisitorStatus.InSite)
+                                            {
+                                                <a asp-page="/Visitors/Checkout" asp-route-id="@visitor.Id" class="btn btn-sm btn-warning">
+                                                    <i class="bi bi-box-arrow-right"></i> 離場
+                                                </a>
+                                            }
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- 分頁 -->
+                    @if (Model.Visitors.TotalPages > 1)
+                    {
+                        <nav>
+                            <ul class="pagination justify-content-center">
+                                @if (Model.Visitors.HasPreviousPage)
+                                {
+                                    <li class="page-item">
+                                        <a class="page-link" asp-page="/Visitors/Index" asp-route-pageIndex="@(Model.Visitors.PageIndex - 1)">上一頁</a>
+                                    </li>
+                                }
+                                @for (int i = 0; i < Model.Visitors.TotalPages; i++)
+                                {
+                                    <li class="page-item @(i == Model.Visitors.PageIndex ? "active" : "")">
+                                        <a class="page-link" asp-page="/Visitors/Index" asp-route-pageIndex="@i">@(i + 1)</a>
+                                    </li>
+                                }
+                                @if (Model.Visitors.HasNextPage)
+                                {
+                                    <li class="page-item">
+                                        <a class="page-link" asp-page="/Visitors/Index" asp-route-pageIndex="@(Model.Visitors.PageIndex + 1)">下一頁</a>
+                                    </li>
+                                }
+                            </ul>
+                        </nav>
+                    }
+
+                    <div class="text-muted text-center">
+                        共 @Model.Visitors.TotalCount 筆資料，第 @(Model.Visitors.PageIndex + 1) / @Model.Visitors.TotalPages 頁
+                    </div>
+                }
+                else
+                {
+                    <div class="alert alert-info text-center">
+                        <i class="bi bi-info-circle"></i> 查無資料
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+}

@@ -1,0 +1,79 @@
+@page
+@model LoginModel
+@{
+    ViewData["Title"] = "登入";
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-6 col-lg-5">
+        <div class="card shadow-sm">
+            <div class="card-body p-4">
+                <h2 class="card-title text-center mb-4">@ViewData["Title"]</h2>
+                <p class="text-muted text-center mb-4">登入您的帳號</p>
+
+                <form id="account" method="post">
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+                    
+                    <div class="mb-3">
+                        <label asp-for="Input.Email" class="form-label">電子郵件</label>
+                        <input asp-for="Input.Email" class="form-control" autocomplete="username" 
+                               aria-required="true" placeholder="name@example.com" />
+                        <span asp-validation-for="Input.Email" class="text-danger small"></span>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label asp-for="Input.Password" class="form-label">密碼</label>
+                        <input asp-for="Input.Password" class="form-control" autocomplete="current-password" 
+                               aria-required="true" placeholder="請輸入密碼" type="password" />
+                        <span asp-validation-for="Input.Password" class="text-danger small"></span>
+                    </div>
+                    
+                    <div class="mb-3 form-check">
+                        <input class="form-check-input" asp-for="Input.RememberMe" />
+                        <label class="form-check-label" asp-for="Input.RememberMe">
+                            記住我
+                        </label>
+                    </div>
+                    
+                    <button id="login-submit" type="submit" class="btn btn-primary w-100 mb-3">登入</button>
+                    
+                    <div class="text-center">
+                        <p class="mb-2">
+                            <a id="forgot-password" asp-page="./ForgotPassword">忘記密碼？</a>
+                        </p>
+                        <p class="mb-0">
+                            還沒有帳號嗎？
+                            <a asp-page="./Register" asp-route-returnUrl="@Model.ReturnUrl">立即註冊</a>
+                        </p>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        @* 外部登入服務區塊（如果有配置） *@
+        @if ((Model.ExternalLogins?.Count ?? 0) > 0)
+        {
+            <div class="card shadow-sm mt-3">
+                <div class="card-body">
+                    <h4 class="card-title">使用其他服務登入</h4>
+                    <hr />
+                    <form id="external-account" asp-page="./ExternalLogin" asp-route-returnUrl="@Model.ReturnUrl" method="post" class="form-horizontal">
+                        <div class="d-grid gap-2">
+                            @foreach (var provider in Model.ExternalLogins)
+                            {
+                                <button type="submit" class="btn btn-outline-secondary" name="provider" value="@provider.Name" 
+                                        title="使用您的 @provider.DisplayName 帳號登入">
+                                    @provider.DisplayName
+                                </button>
+                            }
+                        </div>
+                    </form>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

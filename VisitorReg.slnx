@@ -1,0 +1,7 @@
+<Solution>
+  <Project Path="VisitorReg.Application/VisitorReg.Application.csproj" />
+  <Project Path="VisitorReg.Domain/VisitorReg.Domain.csproj" />
+  <Project Path="VisitorReg.Infrastructure/VisitorReg.Infrastructure.csproj" />
+  <Project Path="VisitorReg.Tests/VisitorReg.Tests.csproj" />
+  <Project Path="VisitorReg.Web/VisitorReg.Web.csproj" />
+</Solution>
