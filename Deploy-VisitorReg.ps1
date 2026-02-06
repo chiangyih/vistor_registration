@@ -28,7 +28,7 @@ param(
     [string]$AppPoolName = "VisitorRegAppPool",
     [string]$WebsiteName = "VisitorReg",
     [int]$Port = 80,
-    [string]$DatabaseServer = "(localdb)\mssqllocaldb",
+    [string]$DatabaseServer = "localhost\SQLEXPRESS",
     [string]$DatabaseName = "VisitorRegDb_Production",
     [switch]$SkipDatabase,
     [switch]$BackupExisting
@@ -354,7 +354,7 @@ try {
     
     Write-ColorOutput "`n建議檢查：" "Yellow"
     Write-ColorOutput "  1. 確認已安裝 .NET SDK 和 .NET Hosting Bundle" "White"
-    Write-ColorOutput "  2. 確認 SQL Server 正在執行" "White"
+    Write-ColorOutput "  2. 確認 SQL Server Express 正在執行" "White"
     Write-ColorOutput "  3. 檢查防火牆和端口是否被佔用" "White"
     Write-ColorOutput "  4. 查看詳細錯誤日誌" "White"
     
