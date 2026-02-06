@@ -226,7 +226,7 @@ GO
 ```powershell
 # 方法 1：使用 dotnet ef（需要安裝 .NET SDK）
 cd C:\inetpub\wwwroot\VisitorReg
-dotnet ef database update --connection "Server=localhost;Database=VisitorRegDb_Production;Trusted_Connection=True;"
+dotnet ef database update --connection "Server=localhost\SQLEXPRESS;Database=VisitorRegDb_Production;Trusted_Connection=True;"
 
 # 方法 2：使用 SQL 腳本（從開發機器生成）
 # 在開發機器上執行：
@@ -246,7 +246,7 @@ dotnet ef migrations script -o migration.sql --project VisitorReg.Infrastructure
 ```json
 {
   "ConnectionStrings": {
-    "DefaultConnection": "Server=localhost;Database=VisitorRegDb_Production;Trusted_Connection=True;MultipleActiveResultSets=true;TrustServerCertificate=True"
+    "DefaultConnection": "Server=localhost\\SQLEXPRESS;Database=VisitorRegDb_Production;Trusted_Connection=True;MultipleActiveResultSets=true;TrustServerCertificate=True"
   },
   "Logging": {
     "LogLevel": {
@@ -258,10 +258,7 @@ dotnet ef migrations script -o migration.sql --project VisitorReg.Infrastructure
 }
 ```
 
-> 💡 **提示**：如果使用 SQL Server 驗證，連線字串改為：
-> ```
-> Server=localhost;Database=VisitorRegDb_Production;User Id=VisitorRegUser;Password=YourStrongPassword123!;MultipleActiveResultSets=true;TrustServerCertificate=True
-> ```
+> 💡 **提示**：本系統使用 SQL Server Express 和 Windows 驗證。連線字串中的 `Trusted_Connection=True` 表示使用 Windows 驗證。
 
 ### 5.2 建立 appsettings.Production.json（建議）
 
@@ -270,7 +267,7 @@ dotnet ef migrations script -o migration.sql --project VisitorReg.Infrastructure
 ```json
 {
   "ConnectionStrings": {
-    "DefaultConnection": "Server=localhost;Database=VisitorRegDb_Production;Trusted_Connection=True;MultipleActiveResultSets=true;TrustServerCertificate=True"
+    "DefaultConnection": "Server=localhost\\SQLEXPRESS;Database=VisitorRegDb_Production;Trusted_Connection=True;MultipleActiveResultSets=true;TrustServerCertificate=True"
   },
   "Logging": {
     "LogLevel": {
@@ -602,7 +599,7 @@ param(
     [string]$AppPoolName = "VisitorRegAppPool",
     [string]$WebsiteName = "VisitorReg",
     [int]$Port = 80,
-    [string]$DatabaseServer = "(localdb)\mssqllocaldb",
+    [string]$DatabaseServer = "localhost\SQLEXPRESS",
     [string]$DatabaseName = "VisitorRegDb_Production",
     [switch]$SkipDatabase,
     [switch]$BackupExisting
@@ -987,7 +984,7 @@ try {
 | `-AppPoolName` | `VisitorRegAppPool` | 應用程式集區名稱 |
 | `-WebsiteName` | `VisitorReg` | 網站名稱 |
 | `-Port` | `80` | 網站監聽端口 |
-| `-DatabaseServer` | `(localdb)\mssqllocaldb` | SQL Server 伺服器 |
+| `-DatabaseServer` | `localhost\SQLEXPRESS` | SQL Server 伺服器 |
 | `-DatabaseName` | `VisitorRegDb_Production` | 資料庫名稱 |
 | `-SkipDatabase` | (開關) | 跳過資料庫設定 |
 | `-BackupExisting` | (開關) | 備份現有部署 |

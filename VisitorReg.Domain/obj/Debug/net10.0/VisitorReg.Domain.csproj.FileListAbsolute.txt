@@ -9,3 +9,4 @@ C:\Users\a\Documents\aa\VisitorReg.Domain\obj\Debug\net10.0\VisitorReg.Domain.dl
 C:\Users\a\Documents\aa\VisitorReg.Domain\obj\Debug\net10.0\refint\VisitorReg.Domain.dll
 C:\Users\a\Documents\aa\VisitorReg.Domain\obj\Debug\net10.0\VisitorReg.Domain.pdb
 C:\Users\a\Documents\aa\VisitorReg.Domain\obj\Debug\net10.0\ref\VisitorReg.Domain.dll
+C:\Users\a\Documents\aa\VisitorReg.Domain\obj\Debug\net10.0\VisitorReg.Domain.sourcelink.json

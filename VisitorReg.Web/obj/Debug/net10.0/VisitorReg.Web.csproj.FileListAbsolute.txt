@@ -293,3 +293,4 @@ C:\Users\a\Documents\aa\VisitorReg.Web\obj\Debug\net10.0\refint\VisitorReg.Web.d
 C:\Users\a\Documents\aa\VisitorReg.Web\obj\Debug\net10.0\VisitorReg.Web.pdb
 C:\Users\a\Documents\aa\VisitorReg.Web\obj\Debug\net10.0\VisitorReg.Web.genruntimeconfig.cache
 C:\Users\a\Documents\aa\VisitorReg.Web\obj\Debug\net10.0\ref\VisitorReg.Web.dll
+C:\Users\a\Documents\aa\VisitorReg.Web\obj\Debug\net10.0\VisitorReg.Web.sourcelink.json

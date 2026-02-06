@@ -15,3 +15,4 @@ C:\Users\a\Documents\aa\VisitorReg.Infrastructure\obj\Debug\net10.0\refint\Visit
 C:\Users\a\Documents\aa\VisitorReg.Infrastructure\obj\Debug\net10.0\VisitorReg.Infrastructure.pdb
 C:\Users\a\Documents\aa\VisitorReg.Infrastructure\obj\Debug\net10.0\VisitorReg.Infrastructure.genruntimeconfig.cache
 C:\Users\a\Documents\aa\VisitorReg.Infrastructure\obj\Debug\net10.0\ref\VisitorReg.Infrastructure.dll
+C:\Users\a\Documents\aa\VisitorReg.Infrastructure\obj\Debug\net10.0\VisitorReg.Infrastructure.sourcelink.json

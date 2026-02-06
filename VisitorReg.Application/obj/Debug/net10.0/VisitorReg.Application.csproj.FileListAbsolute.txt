@@ -15,3 +15,4 @@ C:\Users\a\Documents\aa\VisitorReg.Application\obj\Debug\net10.0\VisitorReg.Appl
 C:\Users\a\Documents\aa\VisitorReg.Application\obj\Debug\net10.0\refint\VisitorReg.Application.dll
 C:\Users\a\Documents\aa\VisitorReg.Application\obj\Debug\net10.0\VisitorReg.Application.pdb
 C:\Users\a\Documents\aa\VisitorReg.Application\obj\Debug\net10.0\ref\VisitorReg.Application.dll
+C:\Users\a\Documents\aa\VisitorReg.Application\obj\Debug\net10.0\VisitorReg.Application.sourcelink.json

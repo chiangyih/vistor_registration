@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("VisitorReg.Web")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+f648b1947ab8477659f8cbf2d95f117ed27e4cc9")]
 [assembly: System.Reflection.AssemblyProductAttribute("VisitorReg.Web")]
 [assembly: System.Reflection.AssemblyTitleAttribute("VisitorReg.Web")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
