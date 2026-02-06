@@ -106,9 +106,33 @@ try {
     }
 
     # Load WebAdministration module for IIS management
-    Write-ColorOutput "Loading IIS management module..." "Yellow"
-    Import-Module WebAdministration -ErrorAction Stop
-    Write-Success "WebAdministration module loaded"
+    Write-ColorOutput "Loading WebAdministration module..." "Yellow"
+    try {
+        Import-Module WebAdministration -ErrorAction Stop
+        Write-Success "WebAdministration module loaded"
+    }
+    catch {
+        Write-ColorOutput "`n================================================" "Red"
+        Write-ColorOutput "  WebAdministration Module Not Available!" "Red"
+        Write-ColorOutput "================================================`n" "Red"
+        
+        Write-ErrorMsg "Failed to load WebAdministration module"
+        Write-ColorOutput "`nThis module is required for IIS management." "Yellow"
+        Write-ColorOutput "Please install IIS Management Scripts and Tools first.`n" "Yellow"
+        
+        Write-ColorOutput "Installation Steps (run as Administrator):" "Cyan"
+        Write-ColorOutput "1. Open PowerShell as Administrator" "White"
+        Write-ColorOutput "2. Run this command:" "White"
+        Write-ColorOutput "   Install-WindowsFeature -Name Web-Scripting-Tools" "Green"
+        Write-ColorOutput "`nOr use Server Manager:" "Cyan"
+        Write-ColorOutput "1. Open Server Manager" "White"
+        Write-ColorOutput "2. Add Roles and Features" "White"
+        Write-ColorOutput "3. Web Server (IIS) > Management Tools" "White"
+        Write-ColorOutput "4. Check 'IIS Management Scripts and Tools'" "White"
+        Write-ColorOutput "5. Install and restart PowerShell`n" "White"
+        
+        exit 1
+    }
 
     # Step 2: Stop services and backup
     Write-Step "Step 2/5: Stop Existing Services"
