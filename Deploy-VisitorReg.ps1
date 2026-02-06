@@ -1,23 +1,23 @@
-<#
+﻿<#
 .SYNOPSIS
-    訪客登記系統 - IIS 一鍵部署腳本
+    Visitor Registration System - IIS Deployment Script
 .DESCRIPTION
-    自動化設定訪客登記系統到 IIS，包含 IIS 設定、資料庫 Migration 等步驟
-    注意：此腳本假設應用程式檔案已經複製到目標位置
+    Automate IIS configuration and database migration setup
+    Note: Application files should already be copied to target location
 .PARAMETER SourcePath
-    專案原始碼路徑（用於 Migration）
+    Source code path (for Migration)
 .PARAMETER WebsitePath
-    IIS 網站實體路徑（應用程式檔案應已存在於此位置）
+    IIS website physical path (application files should already exist here)
 .PARAMETER DatabaseServer
-    SQL Server 伺服器名稱
+    SQL Server name
 .PARAMETER DatabaseName
-    資料庫名稱
+    Database name
 .EXAMPLE
     .\Deploy-VisitorReg.ps1
-    使用預設參數執行部署
+    Run with default parameters
 .EXAMPLE
     .\Deploy-VisitorReg.ps1 -SourcePath "D:\Projects\aa" -DatabaseServer "localhost\SQLEXPRESS"
-    使用自訂參數執行部署
+    Run with custom parameters
 #>
 
 param(
@@ -32,10 +32,8 @@ param(
     [switch]$BackupExisting
 )
 
-# 設定錯誤處理
 $ErrorActionPreference = "Stop"
 
-# 顏色輸出函數
 function Write-ColorOutput {
     param([string]$Message, [string]$Color = "White")
     Write-Host $Message -ForegroundColor $Color
@@ -50,160 +48,142 @@ function Write-Step {
 
 function Write-Success {
     param([string]$Message)
-    Write-ColorOutput "✓ $Message" "Green"
+    Write-ColorOutput "[OK] $Message" "Green"
 }
 
-function Write-Error {
+function Write-ErrorMsg {
     param([string]$Message)
-    Write-ColorOutput "✗ $Message" "Red"
+    Write-ColorOutput "[ERROR] $Message" "Red"
 }
 
-function Write-Warning {
+function Write-WarningMsg {
     param([string]$Message)
-    Write-ColorOutput "⚠ $Message" "Yellow"
+    Write-ColorOutput "[WARN] $Message" "Yellow"
 }
 
 try {
-    Write-ColorOutput "`n
-╔═══════════════════════════════════════════════════════════╗
-║         訪客登記系統 - IIS 設定腳本                      ║
-║                     Version 2.0                           ║
-╚═══════════════════════════════════════════════════════════╝
-" "Cyan"
+    Write-ColorOutput "`n================================================" "Cyan"
+    Write-ColorOutput "  Visitor Registration System - IIS Setup" "Cyan"
+    Write-ColorOutput "                Version 2.0" "Cyan"
+    Write-ColorOutput "================================================`n" "Cyan"
 
-    # ====================================
-    # 步驟 1：檢查必要條件
-    # ====================================
-    Write-Step "步驟 1/5：檢查部署必要條件"
+    # Step 1: Check prerequisites
+    Write-Step "Step 1/5: Check Prerequisites"
     
-    # 檢查是否為管理員
-    if (-NOT ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole] "Administrator")) {
-        Write-Error "此腳本需要系統管理員權限！請以管理員身分執行 PowerShell。"
+    $isAdmin = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole] "Administrator")
+    if (-NOT $isAdmin) {
+        Write-ErrorMsg "Administrator rights required!"
         exit 1
     }
-    Write-Success "管理員權限確認"
+    Write-Success "Administrator rights confirmed"
 
-    # 檢查應用程式路徑
     if (-not (Test-Path $WebsitePath)) {
-        Write-Error "找不到應用程式路徑: $WebsitePath`n請確認應用程式檔案已複製到此位置。"
+        Write-ErrorMsg "Application path not found: $WebsitePath"
+        Write-ErrorMsg "Please copy application files to this location first"
         exit 1
     }
-    Write-Success "應用程式路徑存在: $WebsitePath"
+    Write-Success "Application path exists: $WebsitePath"
 
-    # 檢查專案路徑（用於 Migration）
     if (-not $SkipDatabase) {
         if (-not (Test-Path $SourcePath)) {
-            Write-Warning "找不到專案路徑: $SourcePath"
-            Write-Warning "將跳過資料庫 Migration"
+            Write-WarningMsg "Source path not found: $SourcePath"
+            Write-WarningMsg "Database migration will be skipped"
             $SkipDatabase = $true
         }
         else {
-            Write-Success "專案路徑存在: $SourcePath"
+            Write-Success "Source path exists: $SourcePath"
         }
     }
 
-    # 檢查 IIS
-    if (-not (Get-WindowsFeature -Name Web-Server -ErrorAction SilentlyContinue)) {
-        Write-Warning "IIS 未安裝，正在安裝..."
+    $iisFeature = Get-WindowsFeature -Name Web-Server -ErrorAction SilentlyContinue
+    if (-not $iisFeature -or -not $iisFeature.Installed) {
+        Write-WarningMsg "IIS not installed, installing..."
         Install-WindowsFeature -name Web-Server -IncludeManagementTools
-        Write-Success "IIS 安裝完成"
+        Write-Success "IIS installed"
     }
     else {
-        Write-Success "IIS 已安裝"
+        Write-Success "IIS already installed"
     }
 
-    # ====================================
-    # 步驟 2：停止現有服務與備份
-    # ====================================
-    Write-Step "步驟 2/5：停止現有服務"
+    # Step 2: Stop services and backup
+    Write-Step "Step 2/5: Stop Existing Services"
     
     if (Get-Website -Name $WebsiteName -ErrorAction SilentlyContinue) {
-        Write-Warning "停止現有網站..."
+        Write-WarningMsg "Stopping existing website..."
         Stop-Website -Name $WebsiteName -ErrorAction SilentlyContinue
-        Write-Success "網站已停止"
+        Write-Success "Website stopped"
     }
 
     if (Get-WebAppPool -Name $AppPoolName -ErrorAction SilentlyContinue) {
-        Write-Warning "停止現有應用程式集區..."
+        Write-WarningMsg "Stopping existing app pool..."
         Stop-WebAppPool -Name $AppPoolName -ErrorAction SilentlyContinue
         Start-Sleep -Seconds 2
-        Write-Success "應用程式集區已停止"
+        Write-Success "App pool stopped"
     }
 
-    # 備份現有檔案（如果啟用）
     if ($BackupExisting -and (Test-Path $WebsitePath)) {
         $backupPath = "C:\Backup\VisitorReg_$(Get-Date -Format 'yyyyMMdd_HHmmss')"
-        Write-Warning "備份現有檔案到: $backupPath"
+        Write-WarningMsg "Backing up to: $backupPath"
+        New-Item -ItemType Directory -Path "C:\Backup" -Force -ErrorAction SilentlyContinue | Out-Null
         Copy-Item -Path $WebsitePath -Destination $backupPath -Recurse
-        Write-Success "備份完成"
+        Write-Success "Backup completed"
     }
 
-    # 確保日誌目錄存在
     $logsPath = Join-Path $WebsitePath "logs"
     if (-not (Test-Path $logsPath)) {
         New-Item -ItemType Directory -Path $logsPath -Force | Out-Null
-        Write-Success "日誌目錄已建立"
+        Write-Success "Logs directory created"
     }
 
-    # ====================================
-    # 步驟 3：設定 IIS
-    # ====================================
-    Write-Step "步驟 3/5：設定 IIS"
+    # Step 3: Configure IIS
+    Write-Step "Step 3/5: Configure IIS"
     
-    # 匯入 WebAdministration 模組
     Import-Module WebAdministration
 
-    # 建立應用程式集區
     if (Get-WebAppPool -Name $AppPoolName -ErrorAction SilentlyContinue) {
-        Write-Warning "移除現有應用程式集區..."
+        Write-WarningMsg "Removing existing app pool..."
         Remove-WebAppPool -Name $AppPoolName
     }
     
-    Write-ColorOutput "建立應用程式集區..." "Yellow"
+    Write-ColorOutput "Creating app pool..." "Yellow"
     New-WebAppPool -Name $AppPoolName | Out-Null
     Set-ItemProperty "IIS:\AppPools\$AppPoolName" -Name managedRuntimeVersion -Value ""
     Set-ItemProperty "IIS:\AppPools\$AppPoolName" -Name processModel.identityType -Value "ApplicationPoolIdentity"
-    Write-Success "應用程式集區已建立: $AppPoolName"
+    Write-Success "App pool created: $AppPoolName"
 
-    # 建立網站
     if (Get-Website -Name $WebsiteName -ErrorAction SilentlyContinue) {
-        Write-Warning "移除現有網站..."
+        Write-WarningMsg "Removing existing website..."
         Remove-Website -Name $WebsiteName
     }
     
-    Write-ColorOutput "建立 IIS 網站..." "Yellow"
-    New-Website -Name $WebsiteName `
-        -PhysicalPath $WebsitePath `
-        -ApplicationPool $AppPoolName `
-        -Port $Port `
-        -Force | Out-Null
-    Write-Success "網站已建立: $WebsiteName"
+    Write-ColorOutput "Creating IIS website..." "Yellow"
+    New-Website -Name $WebsiteName -PhysicalPath $WebsitePath -ApplicationPool $AppPoolName -Port $Port -Force | Out-Null
+    Write-Success "Website created: $WebsiteName"
 
-    # 設定權限
-    Write-ColorOutput "設定目錄權限..." "Yellow"
-    icacls $WebsitePath /grant "IIS_IUSRS:(OI)(CI)RX" /T /Q | Out-Null
-    icacls $WebsitePath /grant "IIS APPPOOL\$AppPoolName:(OI)(CI)F" /T /Q | Out-Null
-    Write-Success "權限設定完成"
+    Write-ColorOutput "Setting directory permissions..." "Yellow"
+    $cmd1 = 'icacls "{0}" /grant "IIS_IUSRS:(OI)(CI)RX" /T /Q' -f $WebsitePath
+    cmd /c $cmd1 | Out-Null
+    
+    $appPoolIdentity = "IIS APPPOOL\{0}" -f $AppPoolName
+    $cmd2 = 'icacls "{0}" /grant "{1}:(OI)(CI)F" /T /Q' -f $WebsitePath, $appPoolIdentity
+    cmd /c $cmd2 | Out-Null
+    Write-Success "Permissions configured"
 
-    # ====================================
-    # 步驟 4：設定資料庫
-    # ====================================
+    # Step 4: Configure Database
     if (-not $SkipDatabase) {
-        Write-Step "步驟 4/5：設定資料庫"
+        Write-Step "Step 4/5: Configure Database"
         
-        # 修改連線字串
         $connectionString = "Server=$DatabaseServer;Database=$DatabaseName;Trusted_Connection=True;MultipleActiveResultSets=true;TrustServerCertificate=True"
         
         $appSettingsPath = Join-Path $WebsitePath "appsettings.json"
         if (Test-Path $appSettingsPath) {
-            Write-ColorOutput "更新 appsettings.json..." "Yellow"
+            Write-ColorOutput "Updating appsettings.json..." "Yellow"
             $appSettings = Get-Content $appSettingsPath -Raw | ConvertFrom-Json
             $appSettings.ConnectionStrings.DefaultConnection = $connectionString
             $appSettings | ConvertTo-Json -Depth 10 | Set-Content $appSettingsPath
-            Write-Success "連線字串已更新"
+            Write-Success "Connection string updated"
         }
 
-        # 建立 appsettings.Production.json
         $prodSettingsPath = Join-Path $WebsitePath "appsettings.Production.json"
         $prodSettings = @{
             ConnectionStrings = @{
@@ -217,119 +197,114 @@ try {
             }
         }
         $prodSettings | ConvertTo-Json -Depth 10 | Set-Content $prodSettingsPath
-        Write-Success "appsettings.Production.json 已建立"
+        Write-Success "appsettings.Production.json created"
 
-        # 執行 Migration
-        Write-ColorOutput "執行資料庫 Migration..." "Yellow"
+        Write-ColorOutput "Running database migration..." "Yellow"
         try {
             Push-Location $SourcePath
-            $env:Path = [System.Environment]::GetEnvironmentVariable("Path", "Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path", "User")
             
-            # 檢查 dotnet-ef 工具
-            $efVersion = dotnet ef --version 2>$null
-            if (-not $efVersion) {
-                Write-Warning "安裝 Entity Framework Core 工具..."
+            $efInstalled = $false
+            try {
+                $efVersion = dotnet ef --version 2>&1
+                if ($LASTEXITCODE -eq 0) {
+                    $efInstalled = $true
+                }
+            }
+            catch {
+                $efInstalled = $false
+            }
+            
+            if (-not $efInstalled) {
+                Write-WarningMsg "Installing Entity Framework Core tools..."
                 dotnet tool install --global dotnet-ef
                 $env:Path = [System.Environment]::GetEnvironmentVariable("Path", "Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path", "User")
             }
             
             dotnet ef database update --project VisitorReg.Infrastructure --startup-project VisitorReg.Web --connection $connectionString
             Pop-Location
-            Write-Success "資料庫 Migration 完成"
+            Write-Success "Database migration completed"
         }
         catch {
-            Pop-Location
-            Write-Warning "資料庫 Migration 失敗: $_"
-            Write-Warning "請手動執行 Migration 或檢查資料庫連線"
+            if ((Get-Location).Path -ne $PSScriptRoot) {
+                Pop-Location
+            }
+            Write-WarningMsg "Database migration failed: $_"
+            Write-WarningMsg "Please run migration manually or check database connection"
         }
     }
     else {
-        Write-Step "步驟 4/5：跳過資料庫設定（SkipDatabase 參數已啟用）"
+        Write-Step "Step 4/5: Skip Database (SkipDatabase parameter enabled)"
     }
 
-    # ====================================
-    # 步驟 5：啟動服務並測試
-    # ====================================
-    Write-Step "步驟 5/5：啟動服務並測試"
+    # Step 5: Start services and test
+    Write-Step "Step 5/5: Start Services and Test"
     
-    # 啟動應用程式集區
     Start-WebAppPool -Name $AppPoolName
-    Write-Success "應用程式集區已啟動"
+    Write-Success "App pool started"
 
-    # 等待應用程式集區啟動
     Start-Sleep -Seconds 2
 
-    # 啟動網站
     Start-Website -Name $WebsiteName
-    Write-Success "網站已啟動"
+    Write-Success "Website started"
 
-    # 等待網站啟動
     Start-Sleep -Seconds 3
 
-    # 測試網站
-    Write-ColorOutput "`n正在測試網站..." "Yellow"
+    Write-ColorOutput "`nTesting website..." "Yellow"
     try {
         $response = Invoke-WebRequest -Uri "http://localhost:$Port" -UseBasicParsing -TimeoutSec 10
         if ($response.StatusCode -eq 200) {
-            Write-Success "網站測試成功！HTTP 狀態碼: 200"
+            Write-Success "Website test successful! HTTP Status: 200"
         }
         else {
-            Write-Warning "網站回應異常。HTTP 狀態碼: $($response.StatusCode)"
+            Write-WarningMsg "Website response abnormal. HTTP Status: $($response.StatusCode)"
         }
     }
     catch {
-        Write-Warning "無法連線到網站。請檢查 IIS 設定和應用程式日誌。"
+        Write-WarningMsg "Cannot connect to website. Please check IIS settings and application logs."
     }
 
-    # ====================================
-    # 部署完成
-    # ====================================
-    Write-ColorOutput "`n
-╔═══════════════════════════════════════════════════════════╗
-║                    部署成功完成！                        ║
-╚═══════════════════════════════════════════════════════════╝
-" "Green"
+    # Deployment complete
+    Write-ColorOutput "`n================================================" "Green"
+    Write-ColorOutput "       Deployment Completed Successfully!" "Green"
+    Write-ColorOutput "================================================`n" "Green"
 
-    Write-ColorOutput "`n部署資訊：" "Cyan"
-    Write-ColorOutput "  網站名稱：$WebsiteName" "White"
-    Write-ColorOutput "  應用程式集區：$AppPoolName" "White"
-    Write-ColorOutput "  網站路徑：$WebsitePath" "White"
-    Write-ColorOutput "  存取 URL：http://localhost:$Port" "White"
-    Write-ColorOutput "  資料庫：$DatabaseServer\$DatabaseName" "White"
+    Write-ColorOutput "`nDeployment Information:" "Cyan"
+    Write-ColorOutput "  Website Name: $WebsiteName" "White"
+    Write-ColorOutput "  App Pool: $AppPoolName" "White"
+    Write-ColorOutput "  Website Path: $WebsitePath" "White"
+    Write-ColorOutput "  Access URL: http://localhost:$Port" "White"
+    Write-ColorOutput "  Database: $DatabaseServer\$DatabaseName" "White"
 
-    Write-ColorOutput "`n下一步：" "Cyan"
-    Write-ColorOutput "  1. 在瀏覽器中開啟：http://localhost:$Port" "White"
-    Write-ColorOutput "  2. 註冊新使用者帳號" "White"
-    Write-ColorOutput "  3. 開始使用訪客登記系統" "White"
+    Write-ColorOutput "`nNext Steps:" "Cyan"
+    Write-ColorOutput "  1. Open in browser: http://localhost:$Port" "White"
+    Write-ColorOutput "  2. Register new user account" "White"
+    Write-ColorOutput "  3. Start using the system" "White"
 
-    Write-ColorOutput "`n日誌位置：" "Cyan"
-    Write-ColorOutput "  應用程式日誌：$WebsitePath\logs" "White"
-    Write-ColorOutput "  IIS 日誌：C:\inetpub\logs\LogFiles" "White"
+    Write-ColorOutput "`nLog Locations:" "Cyan"
+    Write-ColorOutput "  Application logs: $WebsitePath\logs" "White"
+    Write-ColorOutput "  IIS logs: C:\inetpub\logs\LogFiles`n" "White"
 
-    # 詢問是否開啟瀏覽器
-    $openBrowser = Read-Host "`n是否要開啟瀏覽器測試網站？(Y/N)"
+    $openBrowser = Read-Host "Open browser to test website? (Y/N)"
     if ($openBrowser -eq 'Y' -or $openBrowser -eq 'y') {
         Start-Process "http://localhost:$Port"
     }
 
 }
 catch {
-    Write-ColorOutput "`n
-╔═══════════════════════════════════════════════════════════╗
-║                    部署失敗！                            ║
-╚═══════════════════════════════════════════════════════════╝
-" "Red"
+    Write-ColorOutput "`n================================================" "Red"
+    Write-ColorOutput "          Deployment Failed!" "Red"
+    Write-ColorOutput "================================================`n" "Red"
     
-    Write-Error "錯誤訊息：$($_.Exception.Message)"
-    Write-ColorOutput "`n錯誤詳情：" "Red"
+    Write-ColorOutput "`nError Message: $($_.Exception.Message)" "Red"
+    Write-ColorOutput "`nError Details:" "Red"
     Write-ColorOutput $_.Exception.ToString() "Red"
     
-    Write-ColorOutput "`n建議檢查：" "Yellow"
-    Write-ColorOutput "  1. 確認應用程式檔案已正確複製到 $WebsitePath" "White"
-    Write-ColorOutput "  2. 確認已安裝 .NET Hosting Bundle" "White"
-    Write-ColorOutput "  3. 確認 SQL Server Express 正在執行" "White"
-    Write-ColorOutput "  4. 檢查防火牆和端口是否被佔用" "White"
-    Write-ColorOutput "  5. 查看詳細錯誤日誌" "White"
+    Write-ColorOutput "`nTroubleshooting:" "Yellow"
+    Write-ColorOutput "  1. Verify application files are in: $WebsitePath" "White"
+    Write-ColorOutput "  2. Verify .NET Hosting Bundle is installed" "White"
+    Write-ColorOutput "  3. Verify SQL Server Express is running" "White"
+    Write-ColorOutput "  4. Check firewall and port availability" "White"
+    Write-ColorOutput "  5. Check detailed error logs`n" "White"
     
     exit 1
 }

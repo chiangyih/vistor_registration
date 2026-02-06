@@ -935,6 +935,41 @@ try {
 
 ---
 
+### 執行前準備
+
+> ⚠️ **重要：PowerShell 執行原則設定**
+> 
+> 在首次執行腳本前，您可能會遇到「檔案未經數位簽署」的錯誤。這是 PowerShell 的安全機制。
+
+#### 解決 PowerShell 執行原則問題
+
+**方法 1：暫時允許執行（推薦）**
+```powershell
+# 以系統管理員身分開啟 PowerShell，然後執行：
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+
+# 然後執行部署腳本
+.\Deploy-VisitorReg.ps1
+```
+此方法只影響當前 PowerShell 視窗，關閉後恢復原設定。
+
+**方法 2：一次性執行**
+```powershell
+# 直接繞過執行原則執行腳本
+powershell -ExecutionPolicy Bypass -File .\Deploy-VisitorReg.ps1
+```
+
+**方法 3：永久變更（需謹慎）**
+```powershell
+# 變更當前使用者的執行原則
+Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned
+
+# 然後執行部署腳本
+.\Deploy-VisitorReg.ps1
+```
+
+---
+
 ### 使用方式
 
 #### 基本使用（使用預設參數）
