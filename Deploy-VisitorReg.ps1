@@ -21,7 +21,7 @@
 #>
 
 param(
-    [string]$SourcePath = "C:\Users\a\Documents\aa",
+    [string]$SourcePath = "C:\vistor_registration-main",
     [string]$WebsitePath = "C:\inetpub\wwwroot\VisitorReg",
     [string]$AppPoolName = "VisitorRegAppPool",
     [string]$WebsiteName = "VisitorReg",
@@ -105,6 +105,11 @@ try {
         Write-Success "IIS already installed"
     }
 
+    # Load WebAdministration module for IIS management
+    Write-ColorOutput "Loading IIS management module..." "Yellow"
+    Import-Module WebAdministration -ErrorAction Stop
+    Write-Success "WebAdministration module loaded"
+
     # Step 2: Stop services and backup
     Write-Step "Step 2/5: Stop Existing Services"
     
@@ -137,8 +142,6 @@ try {
 
     # Step 3: Configure IIS
     Write-Step "Step 3/5: Configure IIS"
-    
-    Import-Module WebAdministration
 
     if (Get-WebAppPool -Name $AppPoolName -ErrorAction SilentlyContinue) {
         Write-WarningMsg "Removing existing app pool..."
